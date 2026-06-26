@@ -1,0 +1,9 @@
+incident_id,incident_type,transport_mode,location,date,severity,status,description
+INC001,Accident,Bus,Sydney CBD,26 Jun 2026,High,Resolved,Multi-vehicle collision at Martin Place
+INC002,Delay,Ferry,Circular Quay,26 Jun 2026,Medium,Ongoing,Service delay due to weather conditions
+INC003,Breakdown,Bus,Parramatta Station,25 Jun 2026,Low,Resolved,Engine failure on route 303
+INC004,Mechanical,Ferry,Manly Wharf,25 Jun 2026,High,Resolved,Propeller mechanical issue
+INC005,Traffic Incident,Bus,Newcastle,25 Jun 2026,Medium,Resolved,Road congestion on Pacific Highway
+INC006,Passenger Injury,Bus,Westmead,24 Jun 2026,High,Resolved,Slip and fall incident on bus
+INC007,Service Suspension,Ferry,Watsons Bay,24 Jun 2026,Medium,Resolved,Temporary service suspension
+INC008,Weather Related,Ferry,Taronga Zoo,23 Jun 2026,Low,Resolved,High seas caused service delays
