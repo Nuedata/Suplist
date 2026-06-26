@@ -3,112 +3,137 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Secure Transit Analytics Portal</title>
+    <title>Transport Hub | Prototype</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen flex items-center justify-center p-4 font-sans">
+<body class="bg-slate-50 text-slate-900 min-h-screen font-sans">
 
-    <div id="loginGate" class="w-full max-w-md bg-slate-900 border border-slate-800 rounded-3xl p-8 shadow-2xl transition-all duration-300">
-        <div class="text-center mb-6">
-            <span class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full">
-                Transport Gateway
-            </span>
-            <h1 class="text-2xl font-extrabold text-white mt-3">Transit Operations Portal</h1>
-            <p class="text-xs text-slate-400 mt-1">Please enter your assigned network credentials.</p>
+    <nav class="bg-white border-b border-slate-200 py-4 px-6 flex justify-between items-center shadow-xs">
+        <div class="flex items-center gap-3">
+            <span class="bg-blue-800 text-white font-black text-xs px-2.5 py-1 rounded tracking-wider uppercase">TRANSPORT</span>
+            <span class="font-bold text-slate-800 text-lg tracking-tight">Transport Hub <span class="text-slate-400 font-normal">Registry</span></span>
+        </div>
+        <div class="text-xs bg-slate-100 text-slate-600 px-3 py-1 rounded-full font-medium">
+            Prototype Environment
+        </div>
+    </nav>
+
+    <div class="max-w-6xl w-full mx-auto p-4 sm:p-6 grid grid-cols-1 lg:grid-cols-4 gap-6">
+        
+        <div class="lg:col-span-4 bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs mb-2">
+            <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Transport & Logistics Partners</h1>
+            <p class="text-sm text-slate-500 mt-1" id="transportCount">Loading active transport providers...</p>
+            
+            <div class="mt-4 max-w-xl">
+                <div class="relative">
+                    <input type="text" id="searchInput" oninput="filterTransport()" placeholder="Search by company name, service type, or location..." 
+                           class="w-full bg-slate-50 border border-slate-300 rounded-xl pl-4 pr-12 py-3 text-sm focus:outline-none focus:border-blue-700 focus:bg-white transition shadow-inner">
+                    <span class="absolute right-4 top-3.5 text-slate-400 text-sm">🔍</span>
+                </div>
+            </div>
         </div>
 
-        <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4">
-            <div>
-                <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">User ID</label>
-                <input type="text" id="userId" required placeholder="e.g., transport-executive"
-                       class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 transition font-mono">
-            </div>
+        <div class="lg:col-span-1 bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs h-fit">
+            <h2 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Refine Search</h2>
+            
+            <div class="space-y-5">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-2">Service Types</label>
+                    <div class="space-y-2 text-sm text-slate-600">
+                        <label class="flex items-center gap-2 cursor-pointer hover:text-blue-800"><input type="checkbox" value="Road Transport" onchange="filterTransport()" class="rounded text-blue-800 focus:ring-blue-700"> Road Transport</label>
+                        <label class="flex items-center gap-2 cursor-pointer hover:text-blue-800"><input type="checkbox" value="Air Freight" onchange="filterTransport()" class="rounded text-blue-800 focus:ring-blue-700"> Air Freight</label>
+                        <label class="flex items-center gap-2 cursor-pointer hover:text-blue-800"><input type="checkbox" value="Maritime Shipping" onchange="filterTransport()" class="rounded text-blue-800 focus:ring-blue-700"> Maritime Shipping</label>
+                        <label class="flex items-center gap-2 cursor-pointer hover:text-blue-800"><input type="checkbox" value="Warehouse & Distribution" onchange="filterTransport()" class="rounded text-blue-800 focus:ring-blue-700"> Warehouse & Distribution</label>
+                    </div>
+                </div>
 
-            <div>
-                <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Password</label>
-                <input type="password" id="password" required placeholder="••••••••••••"
-                       class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 transition font-mono">
-            </div>
+                <hr class="border-slate-100">
 
-            <div id="errorMessage" class="text-xs text-red-400 hidden font-medium bg-red-500/10 border border-red-500/20 p-2.5 rounded-xl">
-                ❌ Invalid credential pair sequence. Try again.
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-2">Special Services</label>
+                    <label class="flex items-center gap-2 cursor-pointer text-sm text-slate-600 hover:text-blue-800">
+                        <input type="checkbox" id="hazmatFilter" onchange="filterTransport()" class="rounded text-blue-800 focus:ring-blue-700">
+                        ⚠️ Hazmat Certified
+                    </label>
+                </div>
             </div>
-
-            <button type="submit" 
-                    class="w-full bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold text-sm py-3 rounded-xl transition shadow-md cursor-pointer mt-2">
-                Authenticate Session
-            </button>
-        </form>
-    </div>
-
-    <div id="dashboardContent" class="max-w-6xl w-full bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-2xl hidden transition-all duration-500">
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-slate-800 pb-5 mb-6 gap-4">
-            <div>
-                <h1 class="text-2xl sm:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400">
-                    Transport & Logistics Executive View
-                </h1>
-                <p class="text-xs text-slate-400 mt-1">Authorized access to active regional distribution and fleet matrices.</p>
-            </div>
-            <button onclick="handleLogout()" 
-                    class="text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 px-4 py-2 rounded-xl transition cursor-pointer">
-                🚪 Terminate Session
-            </button>
         </div>
 
-        <div id="iframePlaceholder" class="relative w-full overflow-hidden rounded-2xl bg-slate-950 border border-slate-800 shadow-2xl aspect-video">
+        <div class="lg:col-span-3 space-y-3" id="transportListContainer">
             </div>
 
-        <div class="mt-5 pt-4 border-t border-slate-800/60 flex justify-between items-center text-[11px] text-slate-500 font-mono">
-            <span>Session Status: Active Transport Handshake</span>
-            <span>Data Source: Microsoft Logistics Core Sandbox</span>
-        </div>
     </div>
 
     <script>
-        // Same credentials: User: transport-executive | Password: innovate2026
-        const TARGET_USER = "transport-executive";
-        const HASHED_PASS_KEY = "f7de6c0b39e68ca431677c7c34b17a0dfa31b64cf685938bf8cda89953925fb5";
+        // Transport providers dataset
+        const transportProviders = [
+            { name: "SWIFT LOGISTICS PTY LTD", date: "26 Jun 2026", service: "Road Transport", region: "Sydney Metro", hazmat: true },
+            { name: "SKYWAY FREIGHT INTERNATIONAL", date: "25 Jun 2026", service: "Air Freight", region: "National", hazmat: false },
+            { name: "OCEANIC SHIPPING LINES", date: "24 Jun 2026", service: "Maritime Shipping", region: "Port Cities", hazmat: true },
+            { name: "CENTRAL DISTRIBUTION NETWORK", date: "26 Jun 2026", service: "Warehouse & Distribution", region: "Regional NSW", hazmat: false },
+            { name: "ELITE COURIER EXPRESS", date: "23 Jun 2026", service: "Road Transport", region: "Metro & Regional", hazmat: false },
+            { name: "PREMIUM COLD CHAIN LOGISTICS", date: "25 Jun 2026", service: "Warehouse & Distribution", region: "Statewide", hazmat: true }
+        ];
 
-        async function sha256(string) {
-            const utf8 = new Uint8Array(Array.from(string).map(c => c.charCodeAt(0)));
-            const hashBuffer = await crypto.subtle.digest('SHA-256', utf8);
-            const hashArray = Array.from(new Uint8Array(hashBuffer));
-            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-        }
+        function filterTransport() {
+            const searchQuery = document.getElementById('searchInput').value.toLowerCase();
+            const checkedServices = Array.from(document.querySelectorAll('input[type="checkbox"]:checked'))
+                                           .map(cb => cb.value)
+                                           .filter(v => v !== 'on');
+            const requireHazmat = document.getElementById('hazmatFilter').checked;
 
-        async function handleLogin(event) {
-            event.preventDefault();
-            const userIn = document.getElementById('userId').value.trim();
-            const passIn = document.getElementById('password').value;
-            const errorDiv = document.getElementById('errorMessage');
+            const container = document.getElementById('transportListContainer');
+            container.innerHTML = '';
 
-            const hashedInputPass = await sha256(passIn);
-
-            if (userIn === TARGET_USER && hashedInputPass === HASHED_PASS_KEY) {
-                document.getElementById('loginGate').classList.add('hidden');
-                document.getElementById('dashboardContent').classList.remove('hidden');
+            // Filter logic
+            const filtered = transportProviders.filter(provider => {
+                const matchesSearch = provider.name.toLowerCase().includes(searchQuery) || provider.region.toLowerCase().includes(searchQuery);
+                const matchesService = checkedServices.length === 0 || checkedServices.includes(provider.service);
+                const matchesHazmat = !requireHazmat || provider.hazmat;
                 
-                // Embedded Public Microsoft Power BI Transport sample tracking map/metrics
-                document.getElementById('iframePlaceholder').innerHTML = `
-                    <iframe 
-                        title="Cargo Transport and Logistics Tracker" 
-                        src="https://app.powerbi.com/view?r=eyJrIjoiN2M2NTEwM2QtYTU1Ny00NDY4LTkyNGUtN2U3YzkwZDRiMzE4IiwidCI6IjU3NGMzZTU2LTQ3NjgtNDZlZC04YjJmLTRhYmFmYmU0Mjg0NCIsImMiOjZ9" 
-                        frameborder="0" 
-                        allowFullScreen="true"
-                        class="absolute top-0 left-0 w-full h-full rounded-2xl">
-                    </iframe>`;
-            } else {
-                errorDiv.classList.remove('hidden');
+                return matchesSearch && matchesService && matchesHazmat;
+            });
+
+            // Update Counter
+            document.getElementById('transportCount').innerText = `${filtered.length} total transport providers matching criteria`;
+
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div class="bg-white border border-slate-200 text-center py-12 rounded-2xl text-slate-400 text-sm">
+                        No transport providers match your exact filtering query.
+                    </div>
+                `;
+                return;
             }
+
+            // Build listing cards
+            filtered.forEach(provider => {
+                const card = document.createElement('div');
+                card.className = "bg-white border border-slate-200 hover:border-blue-600/40 p-5 rounded-2xl transition shadow-xs flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4";
+                
+                card.innerHTML = `
+                    <div class="space-y-1">
+                        <h3 class="font-extrabold text-blue-900 text-base tracking-tight hover:underline cursor-pointer">${provider.name}</h3>
+                        <p class="text-xs font-mono text-slate-400">Updated: ${provider.date} • <span class="text-slate-600 font-sans">${provider.region}</span></p>
+                        <div class="pt-1">
+                            <span class="bg-slate-100 text-slate-700 text-[10px] px-2.5 py-1 rounded font-medium border border-slate-200">
+                                ${provider.service}
+                            </span>
+                        </div>
+                    </div>
+                    
+                    ${provider.hazmat ? `
+                        <div class="flex items-center gap-1.5 bg-amber-50 border border-amber-200 text-amber-800 text-[11px] font-semibold px-3 py-1 rounded-full shrink-0 shadow-2xs">
+                            <span class="text-amber-600">⚠️</span> Hazmat Certified
+                        </div>
+                    ` : ''}
+                `;
+                container.appendChild(card);
+            });
         }
 
-        function handleLogout() {
-            document.getElementById('iframePlaceholder').innerHTML = '';
-            document.getElementById('dashboardContent').classList.add('hidden');
-            document.getElementById('loginGate').classList.remove('hidden');
-            document.getElementById('loginForm').reset();
-            document.getElementById('errorMessage').classList.add('hidden');
-        }
+        // Initialize view on load
+        filterTransport();
     </script>
 </body>
 </html>
