@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure Transit Analytics Portal</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex items-center justify-center p-4 font-sans">
+
+    <div id="loginGate" class="w-full max-w-md bg-slate-900 border border-slate-800 rounded-3xl p-8 shadow-2xl transition-all duration-300">
+        <div class="text-center mb-6">
+            <span class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full">
+                Transport Gateway
+            </span>
+            <h1 class="text-2xl font-extrabold text-white mt-3">Transit Operations Portal</h1>
+            <p class="text-xs text-slate-400 mt-1">Please enter your assigned network credentials.</p>
+        </div>
+
+        <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4">
+            <div>
+                <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">User ID</label>
+                <input type="text" id="userId" required placeholder="e.g., transport-executive"
+                       class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 transition font-mono">
+            </div>
+
+            <div>
+                <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Password</label>
+                <input type="password" id="password" required placeholder="••••••••••••"
+                       class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 transition font-mono">
+            </div>
+
+            <div id="errorMessage" class="text-xs text-red-400 hidden font-medium bg-red-500/10 border border-red-500/20 p-2.5 rounded-xl">
+                ❌ Invalid credential pair sequence. Try again.
+            </div>
+
+            <button type="submit" 
+                    class="w-full bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold text-sm py-3 rounded-xl transition shadow-md cursor-pointer mt-2">
+                Authenticate Session
+            </button>
+        </form>
+    </div>
+
+    <div id="dashboardContent" class="max-w-6xl w-full bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-2xl hidden transition-all duration-500">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-slate-800 pb-5 mb-6 gap-4">
+            <div>
+                <h1 class="text-2xl sm:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400">
+                    Transport & Logistics Executive View
+                </h1>
+                <p class="text-xs text-slate-400 mt-1">Authorized access to active regional distribution and fleet matrices.</p>
+            </div>
+            <button onclick="handleLogout()" 
+                    class="text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 px-4 py-2 rounded-xl transition cursor-pointer">
+                🚪 Terminate Session
+            </button>
+        </div>
+
+        <div id="iframePlaceholder" class="relative w-full overflow-hidden rounded-2xl bg-slate-950 border border-slate-800 shadow-2xl aspect-video">
+            </div>
+
+        <div class="mt-5 pt-4 border-t border-slate-800/60 flex justify-between items-center text-[11px] text-slate-500 font-mono">
+            <span>Session Status: Active Transport Handshake</span>
+            <span>Data Source: Microsoft Logistics Core Sandbox</span>
+        </div>
+    </div>
+
+    <script>
+        // Same credentials: User: transport-executive | Password: innovate2026
+        const TARGET_USER = "transport-executive";
+        const HASHED_PASS_KEY = "f7de6c0b39e68ca431677c7c34b17a0dfa31b64cf685938bf8cda89953925fb5";
+
+        async function sha256(string) {
+            const utf8 = new Uint8Array(Array.from(string).map(c => c.charCodeAt(0)));
+            const hashBuffer = await crypto.subtle.digest('SHA-256', utf8);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        async function handleLogin(event) {
+            event.preventDefault();
+            const userIn = document.getElementById('userId').value.trim();
+            const passIn = document.getElementById('password').value;
+            const errorDiv = document.getElementById('errorMessage');
+
+            const hashedInputPass = await sha256(passIn);
+
+            if (userIn === TARGET_USER && hashedInputPass === HASHED_PASS_KEY) {
+                document.getElementById('loginGate').classList.add('hidden');
+                document.getElementById('dashboardContent').classList.remove('hidden');
+                
+                // Embedded Public Microsoft Power BI Transport sample tracking map/metrics
+                document.getElementById('iframePlaceholder').innerHTML = `
+                    <iframe 
+                        title="Cargo Transport and Logistics Tracker" 
+                        src="https://app.powerbi.com/view?r=eyJrIjoiN2M2NTEwM2QtYTU1Ny00NDY4LTkyNGUtN2U3YzkwZDRiMzE4IiwidCI6IjU3NGMzZTU2LTQ3NjgtNDZlZC04YjJmLTRhYmFmYmU0Mjg0NCIsImMiOjZ9" 
+                        frameborder="0" 
+                        allowFullScreen="true"
+                        class="absolute top-0 left-0 w-full h-full rounded-2xl">
+                    </iframe>`;
+            } else {
+                errorDiv.classList.remove('hidden');
+            }
+        }
+
+        function handleLogout() {
+            document.getElementById('iframePlaceholder').innerHTML = '';
+            document.getElementById('dashboardContent').classList.add('hidden');
+            document.getElementById('loginGate').classList.remove('hidden');
+            document.getElementById('loginForm').reset();
+            document.getElementById('errorMessage').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
