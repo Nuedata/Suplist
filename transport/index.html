@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Transport Hub | Prototype</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body class="bg-slate-50 text-slate-900 min-h-screen font-sans">
 
@@ -64,19 +65,70 @@
                 <p class="text-sm text-slate-500 mt-1">Real-time monitoring of transport incidents and safety data</p>
             </div>
 
-            <!-- Power BI Dashboard Embed -->
-            <div class="bg-white border border-slate-200 rounded-2xl shadow-xs overflow-hidden">
-                <iframe title="Transport Incidents Dashboard" 
-                        src="https://app.powerbi.com/view?r=eyJrIjoiN2M2NTEwM2QtYTU1Ny00NDY4LTkyNGUtN2U3YzkwZDRiMzE4IiwidCI6IjU3NGMzZTU2LTQ3NjgtNDZlZC04YjJmLTRhYmFmYmU0Mjg0NCIsImMiOjZ9" 
-                        frameborder="0" 
-                        allowFullScreen="true"
-                        class="w-full h-screen rounded-2xl">
-                </iframe>
+            <!-- KPI Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs">
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Total Incidents</p>
+                    <p class="text-3xl font-extrabold text-blue-900">247</p>
+                    <p class="text-xs text-slate-500 mt-2">+12 this week</p>
+                </div>
+                <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs">
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Bus Incidents</p>
+                    <p class="text-3xl font-extrabold text-blue-900">156</p>
+                    <p class="text-xs text-slate-500 mt-2">63% of total</p>
+                </div>
+                <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs">
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Ferry Incidents</p>
+                    <p class="text-3xl font-extrabold text-blue-900">91</p>
+                    <p class="text-xs text-slate-500 mt-2">37% of total</p>
+                </div>
+                <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs">
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Avg Resolution Time</p>
+                    <p class="text-3xl font-extrabold text-blue-900">2.4h</p>
+                    <p class="text-xs text-slate-500 mt-2">Last 30 days</p>
+                </div>
+            </div>
+
+            <!-- Charts -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                <!-- Incidents by Type -->
+                <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs">
+                    <h2 class="text-sm font-bold text-slate-700 mb-4">Incidents by Type</h2>
+                    <canvas id="incidentTypeChart"></canvas>
+                </div>
+
+                <!-- Incidents Over Time -->
+                <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs">
+                    <h2 class="text-sm font-bold text-slate-700 mb-4">Incidents Over Time (Last 7 Days)</h2>
+                    <canvas id="incidentsTimeChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Incidents Table -->
+            <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs">
+                <h2 class="text-sm font-bold text-slate-700 mb-4">Recent Incidents</h2>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead class="bg-slate-50 border-b border-slate-200">
+                            <tr>
+                                <th class="text-left py-3 px-4 font-bold text-slate-700">Incident ID</th>
+                                <th class="text-left py-3 px-4 font-bold text-slate-700">Type</th>
+                                <th class="text-left py-3 px-4 font-bold text-slate-700">Transport Mode</th>
+                                <th class="text-left py-3 px-4 font-bold text-slate-700">Location</th>
+                                <th class="text-left py-3 px-4 font-bold text-slate-700">Date</th>
+                                <th class="text-left py-3 px-4 font-bold text-slate-700">Severity</th>
+                                <th class="text-left py-3 px-4 font-bold text-slate-700">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="incidentsTableBody">
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
             <div class="mt-6 bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs">
                 <p class="text-xs text-slate-500 font-mono">
-                    <strong>Data Source:</strong> Public Transport Authority | <strong>Last Updated:</strong> 26 Jun 2026 | <strong>Status:</strong> Active
+                    <strong>Data Source:</strong> Public Transport Authority | <strong>Last Updated:</strong> 26 Jun 2026 10:45 AM | <strong>Status:</strong> Active
                 </p>
             </div>
         </div>
@@ -86,6 +138,18 @@
         // Credentials
         const VALID_USER = "transport-admin";
         const VALID_PASS = "password2026";
+
+        // Sample incident data
+        const incidentData = [
+            { id: 'INC001', type: 'Accident', mode: 'Bus', location: 'Sydney CBD', date: '26 Jun 2026', severity: 'High', status: 'Resolved' },
+            { id: 'INC002', type: 'Delay', mode: 'Ferry', location: 'Circular Quay', date: '26 Jun 2026', severity: 'Medium', status: 'Ongoing' },
+            { id: 'INC003', type: 'Breakdown', mode: 'Bus', location: 'Parramatta Station', date: '25 Jun 2026', severity: 'Low', status: 'Resolved' },
+            { id: 'INC004', type: 'Mechanical', mode: 'Ferry', location: 'Manly Wharf', date: '25 Jun 2026', severity: 'High', status: 'Resolved' },
+            { id: 'INC005', type: 'Traffic Incident', mode: 'Bus', location: 'Newcastle', date: '25 Jun 2026', severity: 'Medium', status: 'Resolved' },
+            { id: 'INC006', type: 'Passenger Injury', mode: 'Bus', location: 'Westmead', date: '24 Jun 2026', severity: 'High', status: 'Resolved' },
+            { id: 'INC007', type: 'Service Suspension', mode: 'Ferry', location: 'Watsons Bay', date: '24 Jun 2026', severity: 'Medium', status: 'Resolved' },
+            { id: 'INC008', type: 'Weather Related', mode: 'Ferry', location: 'Taronga Zoo', date: '23 Jun 2026', severity: 'Low', status: 'Resolved' },
+        ];
 
         function handleLogin(event) {
             event.preventDefault();
@@ -97,6 +161,7 @@
                 document.getElementById('loginSection').classList.add('hidden');
                 document.getElementById('dashboardSection').classList.remove('hidden');
                 errorDiv.classList.add('hidden');
+                initializeDashboard();
             } else {
                 errorDiv.classList.remove('hidden');
                 document.getElementById('password').value = '';
@@ -108,6 +173,75 @@
             document.getElementById('loginSection').classList.remove('hidden');
             document.getElementById('loginForm').reset();
             document.getElementById('errorMessage').classList.add('hidden');
+        }
+
+        function initializeDashboard() {
+            // Populate incidents table
+            const tableBody = document.getElementById('incidentsTableBody');
+            tableBody.innerHTML = incidentData.map(incident => `
+                <tr class="border-b border-slate-100 hover:bg-slate-50">
+                    <td class="py-3 px-4 text-slate-700 font-mono text-xs">${incident.id}</td>
+                    <td class="py-3 px-4 text-slate-700">${incident.type}</td>
+                    <td class="py-3 px-4"><span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded font-medium">${incident.mode}</span></td>
+                    <td class="py-3 px-4 text-slate-700">${incident.location}</td>
+                    <td class="py-3 px-4 text-slate-500 text-xs">${incident.date}</td>
+                    <td class="py-3 px-4">
+                        <span class="text-xs px-2 py-1 rounded font-medium ${incident.severity === 'High' ? 'bg-red-100 text-red-800' : incident.severity === 'Medium' ? 'bg-amber-100 text-amber-800' : 'bg-green-100 text-green-800'}">
+                            ${incident.severity}
+                        </span>
+                    </td>
+                    <td class="py-3 px-4">
+                        <span class="text-xs px-2 py-1 rounded font-medium ${incident.status === 'Resolved' ? 'bg-green-100 text-green-800' : 'bg-orange-100 text-orange-800'}">
+                            ${incident.status}
+                        </span>
+                    </td>
+                </tr>
+            `).join('');
+
+            // Incidents by Type Chart
+            const typeCtx = document.getElementById('incidentTypeChart').getContext('2d');
+            new Chart(typeCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Accident', 'Delay', 'Breakdown', 'Mechanical', 'Other'],
+                    datasets: [{
+                        data: [45, 38, 32, 28, 18],
+                        backgroundColor: ['#1e3a8a', '#3b82f6', '#60a5fa', '#93c5fd', '#dbeafe'],
+                        borderColor: '#ffffff',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { position: 'bottom' } }
+                }
+            });
+
+            // Incidents Over Time Chart
+            const timeCtx = document.getElementById('incidentsTimeChart').getContext('2d');
+            new Chart(timeCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                    datasets: [{
+                        label: 'Bus Incidents',
+                        data: [22, 25, 28, 26, 30, 35, 28],
+                        borderColor: '#1e3a8a',
+                        backgroundColor: 'rgba(30, 58, 138, 0.1)',
+                        tension: 0.4
+                    }, {
+                        label: 'Ferry Incidents',
+                        data: [12, 14, 13, 15, 16, 14, 13],
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { position: 'bottom' } }
+                }
+            });
         }
     </script>
 </body>
